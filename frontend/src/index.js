@@ -1,16 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
 import ShopModal from './components/ShopModal';
 
-const el = document.getElementById('root');
-const root = ReactDOM.createRoot(el);
-
 function App() {
-    return (
-        <>
-            <ShopModal />
-        </>
-    );
+  return (
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/shops" element={<ShopModal />} />
+      </Routes>
+    </>
+  );
 }
 
-root.render(<App />)
+ReactDOM.render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>,
+  document.getElementById('root')
+);
