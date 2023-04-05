@@ -86,4 +86,21 @@ class ShopController extends AbstractController
 
         return new JsonResponse(['status' => 'Shop created!'], Response::HTTP_CREATED);
     }
+
+    /**
+     * @Route("/api/shops/{id}", name="delete_shop", methods={"DELETE"})
+     */
+    public function deleteShop(Request $request, EntityManagerInterface $entityManager, int $id): JsonResponse
+    {
+        $shop = $entityManager->getRepository(Shop::class)->find($id);
+
+        if (!$shop) {
+            throw $this->createNotFoundException('Boutique non trouvée');
+        }
+
+        $entityManager->remove($shop);
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'Boutique supprimée avec succès']);
+    }
 }

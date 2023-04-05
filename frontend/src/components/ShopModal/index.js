@@ -40,10 +40,19 @@ function ShopModal() {
       });
   }, [currentPage]);
 
+  const deleteShop = (id) => {
+    fetch(`http://localhost:8000/api/shops/${id}`, {
+      method: 'DELETE',
+    }).then(() => {
+      const newShops = shops.filter(shop => shop.id !== id);
+      setShops(newShops);
+    }).catch(error => console.error(error));
+  }
+
   return (
     <>
       <div style={{ padding: '5%' }}>
-        <Table striped bordered hover style={{textAlign: 'center'}}>
+        <Table striped bordered hover style={{ textAlign: 'center' }}>
           <thead>
             <tr>
               <th>Nom</th>
@@ -62,7 +71,7 @@ function ShopModal() {
                 <td>{shop.available ? 'Oui' : 'Non'}</td>
                 <td>
                   <button className="btn btn-primary" style={{ marginRight: '5%' }}>Modifier</button>
-                  <button className="btn btn-danger">Supprimer</button>
+                  <button className="btn btn-danger" onClick={() => deleteShop(shop.id)}>Supprimer</button>
                 </td>
               </tr>
             ))}
