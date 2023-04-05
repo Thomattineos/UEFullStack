@@ -35,7 +35,7 @@ class Shop
     /**
      * @ORM\Column(type="boolean")
      */
-    private $leave;
+    private $available;
 
     public function getId(): ?int
     {
@@ -54,39 +54,44 @@ class Shop
         return $this;
     }
 
-    public function getOpeningHours(): ?\DateTimeInterface
+    public function getOpeningHours(): ?\DateTime
     {
         return $this->openingHours;
     }
 
-    public function setOpeningHours(\DateTimeInterface $openingHours): self
+    public function setOpeningHours(\DateTime $openingHours): self
     {
         $this->openingHours = $openingHours;
 
         return $this;
     }
 
-    public function getClosingHours(): ?\DateTimeInterface
+    public function getClosingHours(): ?\DateTime
     {
         return $this->closingHours;
     }
 
-    public function setClosingHours(\DateTimeInterface $closingHours): self
+    public function setClosingHours(\DateTime $closingHours): self
     {
         $this->closingHours = $closingHours;
 
         return $this;
     }
 
-    public function isLeave(): ?bool
+    /**
+     * @return mixed
+     */
+    public function isAvailable()
     {
-        return $this->leave;
+        return $this->available;
     }
 
-    public function setLeave(bool $leave): self
+    /**
+     * @param mixed $available
+     */
+    public function setAvailable($available): void
     {
-        $this->leave = $leave;
-
-        return $this;
+        $this->available = $available;
     }
+
 }

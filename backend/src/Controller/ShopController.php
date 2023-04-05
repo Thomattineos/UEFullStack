@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Shop;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -22,11 +24,16 @@ class ShopController extends AbstractController
     }
 
     /**
-     * @Route("/api/shops", name="api_shops_list")
+     * @Route("/api/shops", name="api_shops_list", methods={"GET"})
      */
-    public function getShops(EntityManagerInterface $entityManager): JsonResponse
+    public function getShops(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $shops = $entityManager->getRepository(Shop::class)->findAll();
+        $page = $request->query->getInt('page', 1);
+        $pageSize = 8;
+        $totalShops = $entityManager->getRepository(Shop::class)->count([]);
+        $totalPages = ceil($totalShops / $pageSize);
+        $offset = ($page - 1) * $pageSize;
+        $shops = $entityManager->getRepository(Shop::class)->findBy([], [], $pageSize, $offset);
         $data = [];
 
         foreach ($shops as $shop) {
@@ -35,10 +42,48 @@ class ShopController extends AbstractController
                 'name' => $shop->getName(),
                 'openingHours' => $shop->getOpeningHours(),
                 'closingHours' => $shop->getClosingHours(),
-                'leave' => $shop->isLeave()
+                'available' => $shop->isAvailable()
             ];
         }
 
-        return new JsonResponse($data);
+        $paginationData = [
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalShops' => $totalShops,
+            'pageSize' => $pageSize,
+            'nextPage' => $page < $totalPages ? $page + 1 : null,
+            'prevPage' => $page > 1 ? $page - 1 : null,
+        ];
+
+        return new JsonResponse([
+            'shops' => $data,
+            'pagination' => $paginationData,
+        ]);
+    }
+
+    /**
+     * @Route("/api/shops", name="add_shop", methods={"POST"})
+     */
+    public function add(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $shop = new Shop();
+        $shop->setName($data['name']);
+
+        $openingHours = new DateTime($data['openingHours']);
+        $closingHours = new DateTime($data['closingHours']);
+
+        //echo $openingHours;
+
+        $shop->setOpeningHours($openingHours);
+        $shop->setClosingHours($closingHours);
+        $shop->setAvailable($data['available']);
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($shop);
+        $entityManager->flush();
+
+        return new JsonResponse(['status' => 'Shop created!'], Response::HTTP_CREATED);
     }
 }
