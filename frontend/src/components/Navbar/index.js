@@ -16,9 +16,10 @@ function Navbar() {
               <Link className="nav-link" aria-current="page" to="/">Accueil</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/shops" style={{ textDecoration: 'none' }}>
-                Boutiques
-              </Link>
+              <Link className="nav-link" to="/shops" style={{ textDecoration: 'none' }}>Boutiques</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/products" style={{ textDecoration: 'none' }}>Produits</Link>
             </li>
           </ul>
         </div>

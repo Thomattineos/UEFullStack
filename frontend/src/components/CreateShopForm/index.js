@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const ShopForm = () => {
+const CreateShopForm = () => {
   const [name, setName] = useState("");
   const [openingHours, setOpeningHours] = useState("");
   const [closingHours, setClosingHours] = useState("");
@@ -49,7 +49,7 @@ const ShopForm = () => {
     <div style={{ margin: '5%', padding: '2%', border: '1px solid', borderRadius: '15px' }}>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label htmlFor="name" className="form-label">Name:</label>
+          <label htmlFor="name" className="form-label">Nom de la boutique:</label>
           <input
             type="text"
             id="name"
@@ -59,7 +59,7 @@ const ShopForm = () => {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="openingHours" className="form-label">Opening hours:</label>
+          <label htmlFor="openingHours" className="form-label">Horaires d'ouverture :</label>
           <input
             type="time"
             id="openingHours"
@@ -69,7 +69,7 @@ const ShopForm = () => {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="closingHours" className="form-label">Closing hours:</label>
+          <label htmlFor="closingHours" className="form-label">Horaires de fermeture :</label>
           <input
             type="time"
             id="closingHours"
@@ -88,7 +88,7 @@ const ShopForm = () => {
           />
           <label htmlFor="available" className="form-check-label">Congé :</label>
         </div>
-        <button type="submit" className="btn btn-primary">Add Shop</button>
+        <button type="submit" className="btn btn-primary">Créer la boutique</button>
       </form>
 
       {showToast && (
@@ -123,4 +123,4 @@ const ShopForm = () => {
   );
 };
 
-export default ShopForm;
+export default CreateShopForm;

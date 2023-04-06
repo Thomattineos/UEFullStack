@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Table } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-function ShopModal() {
+function ProductModal() {
   const [shops, setShops] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -97,4 +97,4 @@ function ShopModal() {
   );
 }
 
-export default ShopModal;
+export default ProductModal;
