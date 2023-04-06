@@ -7,6 +7,7 @@ const { id } = useParams();
 const navigate = useNavigate();
 const [name, setName] = useState('');
 const [price, setPrice] = useState('');
+const [description, setDescription] = useState('');
 const [showToast, setShowToast] = useState(false);
 const [toastMessage, setToastMessage] = useState("");
 const [toastType, setToastType] = useState("");
@@ -18,6 +19,7 @@ useEffect(() => {
             const product = response.data;
             setName(product.name);
             setPrice(product.price);
+            setDescription(product.description);
         })
         .catch(error => console.log(error));
 }, [id]);
@@ -27,6 +29,7 @@ const handleSubmit = e => {
     const updatedProduct = {
         name,
         price,
+        description,
     };
     axios.put(`http://localhost:8080/api/products/${id}`, updatedProduct)
         .then((response) => {
@@ -75,6 +78,16 @@ return (
                         className="form-control"
                         value={price}
                         onChange={(e) => setPrice(e.target.value)}
+                    />
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="description" className="form-label">Description :</label>
+                    <input
+                        type="texte"
+                        id="description"
+                        className="form-control"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
                     />
                 </div>
                 <button type="submit" className="btn btn-primary">Modifier le produit</button>

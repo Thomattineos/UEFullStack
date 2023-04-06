@@ -41,7 +41,8 @@ class ProductController extends AbstractController
             $data[] = [
                 'id' => $product->getId(),
                 'name' => $product->getName(),
-                'price' => $product->getPrice()
+                'price' => $product->getPrice(),
+                'description' => $product->getDescription(),
             ];
         }
 
@@ -70,7 +71,7 @@ class ProductController extends AbstractController
         $product = $repository->find($id);
 
         if (!$product) {
-            return new JsonResponse(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['erreur' => 'Le produit n\'a pas été trouvé'], Response::HTTP_NOT_FOUND);
         }
 
         return $this->json($product);
@@ -89,11 +90,12 @@ class ProductController extends AbstractController
         $product = new Product();
         $product->setName($data['name']);
         $product->setPrice($data['price']);
+        $product->setDescription($data['description']);
 
         $entityManager->persist($product);
         $entityManager->flush();
 
-        return new JsonResponse(['message' => 'Product created'], Response::HTTP_CREATED);
+        return new JsonResponse(['message' => 'Le produit a été créé avec succès'], Response::HTTP_CREATED);
     }
 
 
@@ -106,17 +108,18 @@ class ProductController extends AbstractController
         $product = $entityManager->getRepository(Product::class)->find($id);
 
         if (!$product) {
-            throw $this->createNotFoundException('No product found for id '.$id);
+            throw $this->createNotFoundException('Impossible de trouver le produit pour l\'id : '.$id);
         }
 
         $data = json_decode($request->getContent(), true);
 
         $product->setName($data['name']);
         $product->setPrice($data['price']);
+        $product->setDescription($data['description']);
 
         $entityManager->flush();
 
-        return new JsonResponse(['message' => 'Product updated'], Response::HTTP_OK);
+        return new JsonResponse(['message' => 'Le produit a été modifié avec succès'], Response::HTTP_OK);
     }
 
 
@@ -129,12 +132,12 @@ class ProductController extends AbstractController
         $product = $entityManager->getRepository(Product::class)->find($id);
 
         if (!$product) {
-            throw $this->createNotFoundException('No product found for id '.$id);
+            throw $this->createNotFoundException('Impossible de trouver le produit pour l\'id : '.$id);
         }
 
         $entityManager->remove($product);
         $entityManager->flush();
 
-        return new JsonResponse(['message' => 'Product deleted'], Response::HTTP_OK);
+        return new JsonResponse(['message' => 'Le produit a été supprimé avec succès'], Response::HTTP_OK);
     }
 }

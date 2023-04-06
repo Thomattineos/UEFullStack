@@ -68,14 +68,16 @@ function ProductModal() {
                         <tr>
                             <th>Nom</th>
                             <th>Prix</th>
+                            <th>Description</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {products.map((product) => (
                             <tr key={product.id}>
-                                <td width={'60%'}>{product.name}</td>
+                                <td width={'30%'}>{product.name}</td>
                                 <td>{product.price} €</td>
+                                <td width={'30%'}>{product.description}</td>
                                 <td>
                                     <button className="btn btn-primary" style={{ marginRight: '5%' }} onClick={() => updateProduct(product.id)}>Modifier</button>
                                     <button className="btn btn-danger" onClick={() => deleteProduct(product.id)}>Supprimer</button>
