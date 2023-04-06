@@ -11,7 +11,7 @@ function ShopModal() {
   const navigate = useNavigate();
 
   const handleAddShop = () => {
-    navigate('/add');
+    navigate('/createShop');
   };
 
   const handlePrevPage = () => {
@@ -32,8 +32,8 @@ function ShopModal() {
       .then(data => {
         const processedData = data.shops.map(shop => ({
           ...shop,
-          openingHours: new Date(shop.openingHours.date).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' }),
-          closingHours: new Date(shop.closingHours.date).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' }),
+          openingHours: new Date(shop.openingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          closingHours: new Date(shop.closingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         }));
         setShops(processedData);
         setTotalPages(data.pagination.totalPages);
@@ -42,7 +42,7 @@ function ShopModal() {
 
   const updateShop = (id) => {
     console.log("id=" + id);
-    navigate(`/${id}/update`);
+    navigate(`/${id}/updateShop`);
   }
 
   const deleteShop = (id) => {

@@ -26,7 +26,7 @@ class ShopController extends AbstractController
     }
 
     /**
-     * @Route("/api/shops", name="api_shops_list", methods={"GET"})
+     * @Route("/api/shops", name="get_shops", methods={"GET"})
      */
     public function getShops(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -88,9 +88,9 @@ class ShopController extends AbstractController
 
 
     /**
-     * @Route("/api/shops", name="add_shop", methods={"POST"})
+     * @Route("/api/shops", name="create_shop", methods={"POST"})
      */
-    public function addShop(Request $request): JsonResponse
+    public function createShop(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
