@@ -4,15 +4,15 @@ import { Table } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Prev } from 'react-bootstrap/esm/PageItem';
 
-function ProductModal() {
-    const [products, setProducts] = useState([]);
+function CategoryModal() {
+    const [categories, setCategories] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
     const navigate = useNavigate();
 
-    const handleAddProduct = () => {
-        navigate('/createProduct');
+    const handleAddCategory = () => {
+        navigate('/createCategory');
     };
 
     const handlePrevPage = () => {
@@ -28,32 +28,32 @@ function ProductModal() {
     };
 
     useEffect(() => {
-        fetch(`http://localhost:8080/api/products?page=${currentPage}&limit=8`)
+        fetch(`http://localhost:8080/api/categories?page=${currentPage}&limit=8`)
             .then(response => response.json())
             .then(data => {
-                setProducts(data.products);
+                setCategories(data.categories);
                 setTotalPages(data.pagination.totalPages);
             });
     }, [currentPage]);
 
-    const updateProduct = (id) => {
+    const updateCategory = (id) => {
         console.log("id=" + id);
-        navigate(`/${id}/updateProduct`);
+        navigate(`/${id}/updateCategory`);
     }
 
-    const deleteProduct = (id) => {
-        fetch(`http://localhost:8080/api/products/${id}`, {
+    const deleteCategory = (id) => {
+        fetch(`http://localhost:8080/api/categories/${id}`, {
             method: 'DELETE',
         }).then(() => {
-            fetch(`http://localhost:8080/api/products?page=${currentPage}&limit=8`)
+            fetch(`http://localhost:8080/api/categories?page=${currentPage}&limit=8`)
             .then(response => response.json())
             .then(data => {
                 console.log(data)
-                if(data.products.length === 0) {
+                if(data.categories.length === 0) {
                     setCurrentPage(prev => prev - 1 );
                     setTotalPages(prev => prev - 1);
                 }
-                setProducts(data.products);
+                setCategories(data.categories);
                 setTotalPages(data.pagination.totalPages);
             });
         }).catch(error => console.error(error));
@@ -61,24 +61,22 @@ function ProductModal() {
 
     return (
         <>
-            <h1 style={{textAlign: "center", marginTop: "4%"}}>Liste des produits</h1>
+            <h1 style={{textAlign: "center", marginTop: "4%"}}>Liste des catégories</h1>
             <div style={{ paddingTop: '4%', paddingRight: '5%', paddingLeft: '5%' }}>
                 <Table striped bordered hover style={{ textAlign: 'center' }}>
                     <thead>
                         <tr>
                             <th>Nom</th>
-                            <th>Prix</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map((product) => (
-                            <tr key={product.id}>
-                                <td width={'60%'}>{product.name}</td>
-                                <td>{product.price} €</td>
+                        {categories.map((category) => (
+                            <tr key={category.id}>
+                                <td width={'60%'}>{category.name}</td>
                                 <td>
-                                    <button className="btn btn-primary" style={{ marginRight: '5%' }} onClick={() => updateProduct(product.id)}>Modifier</button>
-                                    <button className="btn btn-danger" onClick={() => deleteProduct(product.id)}>Supprimer</button>
+                                    <button className="btn btn-primary" style={{ marginRight: '5%' }} onClick={() => updateCategory(category.id)}>Modifier</button>
+                                    <button className="btn btn-danger" onClick={() => deleteCategory(category.id)}>Supprimer</button>
                                 </td>
                             </tr>
                         ))}
@@ -91,12 +89,12 @@ function ProductModal() {
                 <button className="btn btn-primary" onClick={handleNextPage}>Suivant</button>
             </div>
             <div className="d-flex justify-content-center">
-                <button className="btn btn-primary mt-3" onClick={handleAddProduct}>
-                    Ajouter un produit
+                <button className="btn btn-primary mt-3" onClick={handleAddCategory}>
+                    Ajouter une catégorie
                 </button>
             </div>
         </>
     );
 }
 
-export default ProductModal;
+export default CategoryModal;

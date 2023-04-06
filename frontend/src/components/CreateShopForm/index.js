@@ -15,7 +15,7 @@ const CreateShopForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post("http://localhost:8000/api/shops", {
+    axios.post("http://localhost:8080/api/shops", {
       name,
       openingHours,
       closingHours,
@@ -29,7 +29,7 @@ const CreateShopForm = () => {
           resetForm();
           setTimeout(() => {
             setShowToast(false);
-          }, 3000);
+          }, 2000);
 
         } else {
           setToastMessage("Impossible de créer la boutique");

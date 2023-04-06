@@ -2,63 +2,60 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
-const UpdateProductForm = () => {
+const UpdateCategoryForm = () => {
 const { id } = useParams();
 const navigate = useNavigate();
 const [name, setName] = useState('');
-const [price, setPrice] = useState('');
 const [showToast, setShowToast] = useState(false);
 const [toastMessage, setToastMessage] = useState("");
 const [toastType, setToastType] = useState("");
 
 useEffect(() => {
-    const productId = parseInt(id, 10);
-    axios.get(`http://localhost:8080/api/products/${productId}`)
+    const categoryId = parseInt(id, 10);
+    axios.get(`http://localhost:8080/api/categories/${categoryId}`)
         .then(response => {
-            const product = response.data;
-            setName(product.name);
-            setPrice(product.price);
+            const category = response.data;
+            setName(category.name);
         })
         .catch(error => console.log(error));
 }, [id]);
 
 const handleSubmit = e => {
     e.preventDefault();
-    const updatedProduct = {
+    const updatedCategory = {
         name,
-        price,
     };
-    axios.put(`http://localhost:8080/api/products/${id}`, updatedProduct)
+    axios.put(`http://localhost:8080/api/categories/${id}`, updatedCategory)
         .then((response) => {
             if (response.status === 200) {
-                setToastMessage("Produit modifié avec succès");
+                setToastMessage("Catégorie modifiée avec succès");
                 setToastType("bg-success text-white");
                 setShowToast(true);
 
             } else {
-                setToastMessage("Impossible de modifier le produit");
+                setToastMessage("Impossible de modifier la catégorie");
                 setToastType("bg-danger text-white");
                 setShowToast(true);
             }
         })
         .catch((error) => {
-            setToastMessage("Impossible de modifier le produit");
+            setToastMessage("Impossible de modifier la catégorie");
             setToastType("bg-danger text-white");
             setShowToast(true);
         });
 };
 
 const handleBack = () => {
-    navigate('/products');
+    navigate('/categories');
 };
 
 return (
     <>
-        <h1 style={{textAlign: "center", marginTop: "4%"}}>Modifier le produit</h1>
+        <h1 style={{textAlign: "center", marginTop: "4%"}}>Modifier la catégorie</h1>
         <div style={{ margin: '5%', padding: '2%', border: '1px solid', borderRadius: '15px' }}>
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                    <label htmlFor="name" className="form-label">Nom du produit:</label>
+                    <label htmlFor="name" className="form-label">Nom de la catégorie:</label>
                     <input
                         type="text"
                         id="name"
@@ -67,17 +64,7 @@ return (
                         onChange={(e) => setName(e.target.value)}
                     />
                 </div>
-                <div className="mb-3">
-                    <label htmlFor="price" className="form-label">Prix :</label>
-                    <input
-                        type="number"
-                        id="price"
-                        className="form-control"
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                    />
-                </div>
-                <button type="submit" className="btn btn-primary">Modifier le produit</button>
+                <button type="submit" className="btn btn-primary">Modifier la catégorie</button>
             </form>
 
             {showToast && (
@@ -112,4 +99,4 @@ return (
     );
 };
 
-export default UpdateProductForm;
+export default UpdateCategoryForm;

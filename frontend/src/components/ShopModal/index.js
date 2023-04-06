@@ -27,7 +27,7 @@ function ShopModal() {
   };
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/shops?page=${currentPage}&limit=8`)
+    fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8`)
       .then(response => response.json())
       .then(data => {
         const processedData = data.shops.map(shop => ({
@@ -46,10 +46,10 @@ function ShopModal() {
   }
 
   const deleteShop = (id) => {
-    fetch(`http://localhost:8000/api/shops/${id}`, {
+    fetch(`http://localhost:8080/api/shops/${id}`, {
       method: 'DELETE',
     }).then(() => {
-      fetch(`http://localhost:8000/api/shops?page=${currentPage}&limit=8`)
+      fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8`)
             .then(response => response.json())
             .then(data => {
                 console.log(data)

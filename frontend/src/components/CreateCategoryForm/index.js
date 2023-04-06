@@ -2,10 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const CreateProductForm = () => {
+const CreateCategoryForm = () => {
     const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [price, setPrice] = useState("");
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
     const [toastType, setToastType] = useState("");
@@ -15,13 +13,12 @@ const CreateProductForm = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         axios
-            .post("http://localhost:8080/api/products", {
+            .post("http://localhost:8080/api/categories", {
                 name,
-                price,
             })
             .then((response) => {
-                if (response.status === 201) {
-                    setToastMessage("Produit créé avec succès");
+                if (response.status === 200) {
+                    setToastMessage("Catégorie créée avec succès");
                     setToastType("bg-success text-white");
                     setShowToast(true);
                     resetForm();
@@ -29,35 +26,34 @@ const CreateProductForm = () => {
             setShowToast(false);
           }, 2000);
                 } else {
-                    setToastMessage("Impossible de créer le produit");
+                    setToastMessage("Impossible de créer la catégorie");
                     setToastType("bg-danger text-white");
                     setShowToast(true);
                 }
             })
             .catch((error) => {
-                setToastMessage("Impossible de créer le produit");
+                setToastMessage("Impossible de créer la catégorie");
                 setToastType("bg-danger text-white");
                 setShowToast(true);
             });
     };
 
     const handleBack = () => {
-        navigate("/products");
+        navigate("/categories");
     };
 
     const resetForm = () =>  {
         setName("");
-        setPrice("");
       }
 
 
     return (
         <>
-            <h1 style={{textAlign: "center", marginTop: "4%"}}>Créer un nouveau produit</h1>
+            <h1 style={{textAlign: "center", marginTop: "4%"}}>Créer une nouvelle catégorie</h1>
             <div style={{ margin: '5%', padding: '2%', border: '1px solid', borderRadius: '15px' }}>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-                        <label htmlFor="name" className="form-label">Nom du produit:</label>
+                        <label htmlFor="name" className="form-label">Nom de la catégorie :</label>
                         <input
                             type="text"
                             id="name"
@@ -66,17 +62,7 @@ const CreateProductForm = () => {
                             onChange={(e) => setName(e.target.value)}
                         />
                     </div>
-                    <div className="mb-3">
-                        <label htmlFor="price" className="form-label">Prix :</label>
-                        <input
-                            type="number"
-                            id="price"
-                            className="form-control"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
-                        />
-                    </div>
-                    <button type="submit" className="btn btn-primary">Créer le produit</button>
+                    <button type="submit" className="btn btn-primary">Créer la catégorie</button>
                 </form>
                 {showToast && (
                     <div
@@ -109,4 +95,4 @@ const CreateProductForm = () => {
         </>
     );
 }
-export default CreateProductForm;
+export default CreateCategoryForm;

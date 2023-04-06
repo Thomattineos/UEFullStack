@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,11 +29,37 @@ class CategoryController extends AbstractController
     /**
      * @Route("/api/categories", name="get_categories", methods={"GET"})
      */
-    public function getCategories(CategoryRepository $categoryRepository): Response
+    public function getCategories(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $categories = $categoryRepository->findAll();
+        $page = $request->query->getInt('page', 1);
+        $pageSize = 8;
+        $totalCategories = $entityManager->getRepository(Category::class)->count([]);
+        $totalPages = ceil($totalCategories / $pageSize);
+        $offset = ($page - 1) * $pageSize;
+        $categories = $entityManager->getRepository(Category::class)->findBy([], [], $pageSize, $offset);
+        $data = [];
 
-        return $this->json($categories);
+        foreach ($categories as $category) {
+            $data[] = [
+                'id' => $category->getId(),
+                'name' => $category->getName(),
+            ];
+        }
+
+        $paginationData = [
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalProducts' => $totalCategories,
+            'pageSize' => $pageSize,
+            'nextPage' => $page < $totalPages ? $page + 1 : null,
+            'prevPage' => $page > 1 ? $page - 1 : null,
+        ];
+
+
+        return new JsonResponse([
+            'categories' => $data,
+            'pagination' => $paginationData,
+        ]);
     }
 
     /**

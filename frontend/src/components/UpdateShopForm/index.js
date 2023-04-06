@@ -15,7 +15,7 @@ const UpdateShopForm = () => {
 
     useEffect(() => {
         const shopId = parseInt(id, 10);
-        axios.get(`http://localhost:8000/api/shops/${shopId}`)
+        axios.get(`http://localhost:8080/api/shops/${shopId}`)
             .then(response => {
                 const shop = response.data;
                 setName(shop.name);
@@ -35,7 +35,7 @@ const UpdateShopForm = () => {
             available,
         };
         console.log(name, openingHours, closingHours, available);
-        axios.put(`http://localhost:8000/api/shops/${id}`, updatedShop)
+        axios.put(`http://localhost:8080/api/shops/${id}`, updatedShop)
             .then((response) => {
                 if (response.status === 200) {
                     setToastMessage("Boutique modifiée avec succès");
