@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Table } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Prev } from 'react-bootstrap/esm/PageItem';
 
 function ProductModal() {
     const [products, setProducts] = useState([]);
@@ -44,14 +45,24 @@ function ProductModal() {
         fetch(`http://localhost:8000/api/products/${id}`, {
             method: 'DELETE',
         }).then(() => {
-            const newProducts = products.filter(product => product.id !== id);
-            setProducts(newProducts);
+            fetch(`http://localhost:8000/api/products?page=${currentPage}&limit=8`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                if(data.products.length === 0) {
+                    setCurrentPage(prev => prev - 1 );
+                    setTotalPages(prev => prev - 1);
+                }
+                setProducts(data.products);
+                setTotalPages(data.pagination.totalPages);
+            });
         }).catch(error => console.error(error));
     }
 
     return (
         <>
-            <div style={{ padding: '5%' }}>
+            <h1 style={{textAlign: "center", marginTop: "4%"}}>Liste des produits</h1>
+            <div style={{ paddingTop: '4%', paddingRight: '5%', paddingLeft: '5%' }}>
                 <Table striped bordered hover style={{ textAlign: 'center' }}>
                     <thead>
                         <tr>

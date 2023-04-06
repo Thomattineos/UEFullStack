@@ -26,6 +26,10 @@ const CreateShopForm = () => {
           setToastMessage("Boutique créée avec succès");
           setToastType("bg-success text-white");
           setShowToast(true);
+          resetForm();
+          setTimeout(() => {
+            setShowToast(false);
+          }, 3000);
 
         } else {
           setToastMessage("Impossible de créer la boutique");
@@ -38,7 +42,15 @@ const CreateShopForm = () => {
         setToastType("bg-danger text-white");
         setShowToast(true);
       });
+    
   };
+
+  const resetForm = () =>  {
+    setName("");
+    setOpeningHours("");
+    setClosingHours("");
+    setAvailable(false);
+  }
 
   const handleBack = () => {
     navigate('/shops');
@@ -46,6 +58,7 @@ const CreateShopForm = () => {
 
   return (
     <>
+      <h1 style={{textAlign: "center", marginTop: "4%"}}>Créer une nouvelle boutique</h1>
       <div style={{ margin: '5%', padding: '2%', border: '1px solid', borderRadius: '15px' }}>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">

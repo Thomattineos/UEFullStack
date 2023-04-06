@@ -54,6 +54,7 @@ const handleBack = () => {
 
 return (
     <>
+        <h1 style={{textAlign: "center", marginTop: "4%"}}>Modifier le produit</h1>
         <div style={{ margin: '5%', padding: '2%', border: '1px solid', borderRadius: '15px' }}>
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">

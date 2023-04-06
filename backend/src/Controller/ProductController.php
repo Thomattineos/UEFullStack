@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Entity\Shop;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,24 +16,38 @@ class ProductController extends AbstractController
     /**
      * @Route("/api/products", name="get_product", methods={"GET"})
      */
-    public function getProducts(Request $request): JsonResponse
+    public function getProducts(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $page = $request->query->getInt('page', 1);
-        $limit = $request->query->getInt('limit', 10);
+        $pageSize = 8;
+        $totalProducts = $entityManager->getRepository(Product::class)->count([]);
+        $totalPages = ceil($totalProducts / $pageSize);
+        $offset = ($page - 1) * $pageSize;
+        $products = $entityManager->getRepository(Product::class)->findBy([], [], $pageSize, $offset);
+        $data = [];
 
-        $repository = $this->getDoctrine()->getRepository(Product::class);
-        $products = $repository->findBy([], null, $limit, ($page - 1) * $limit);
+        foreach ($products as $product) {
+            $data[] = [
+                'id' => $product->getId(),
+                'name' => $product->getName(),
+                'price' => $product->getPrice()
+            ];
+        }
 
-        $totalProducts = $repository->count([]);
-
-        $data = [
-            'products' => $products,
-            'totalCount' => $totalProducts,
+        $paginationData = [
             'currentPage' => $page,
-            'totalPages' => ceil($totalProducts / $limit),
+            'totalPages' => $totalPages,
+            'totalProducts' => $totalProducts,
+            'pageSize' => $pageSize,
+            'nextPage' => $page < $totalPages ? $page + 1 : null,
+            'prevPage' => $page > 1 ? $page - 1 : null,
         ];
 
-        return $this->json($data);
+
+        return new JsonResponse([
+            'products' => $data,
+            'pagination' => $paginationData,
+        ]);
     }
 
     /**

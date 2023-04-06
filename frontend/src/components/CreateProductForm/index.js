@@ -24,6 +24,10 @@ const CreateProductForm = () => {
                     setToastMessage("Produit créé avec succès");
                     setToastType("bg-success text-white");
                     setShowToast(true);
+                    resetForm();
+          setTimeout(() => {
+            setShowToast(false);
+          }, 2000);
                 } else {
                     setToastMessage("Impossible de créer le produit");
                     setToastType("bg-danger text-white");
@@ -41,9 +45,15 @@ const CreateProductForm = () => {
         navigate("/products");
     };
 
+    const resetForm = () =>  {
+        setName("");
+        setPrice("");
+      }
+
 
     return (
         <>
+            <h1 style={{textAlign: "center", marginTop: "4%"}}>Créer un nouveau produit</h1>
             <div style={{ margin: '5%', padding: '2%', border: '1px solid', borderRadius: '15px' }}>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">

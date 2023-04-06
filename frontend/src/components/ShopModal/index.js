@@ -49,14 +49,29 @@ function ShopModal() {
     fetch(`http://localhost:8000/api/shops/${id}`, {
       method: 'DELETE',
     }).then(() => {
-      const newShops = shops.filter(shop => shop.id !== id);
-      setShops(newShops);
+      fetch(`http://localhost:8000/api/shops?page=${currentPage}&limit=8`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                if(data.shops.length === 0) {
+                    setCurrentPage(prev => prev - 1 );
+                    setTotalPages(prev => prev - 1);
+                }
+                const processedData = data.shops.map(shop => ({
+                  ...shop,
+                  openingHours: new Date(shop.openingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  closingHours: new Date(shop.closingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                }));
+                setShops(processedData);
+                setTotalPages(data.pagination.totalPages);
+            });
     }).catch(error => console.error(error));
   }
 
   return (
     <>
-      <div style={{ padding: '5%' }}>
+      <h1 style={{textAlign: "center", marginTop: "4%"}}>Liste des boutiques</h1>
+      <div style={{ paddingTop: '4%', paddingRight: '5%', paddingLeft: '5%' }}>
         <Table striped bordered hover style={{ textAlign: 'center' }}>
           <thead>
             <tr>
