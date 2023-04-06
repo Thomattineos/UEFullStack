@@ -13,6 +13,17 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ProductController extends AbstractController
 {
+
+    /**
+     * @Route("/api/product", name="app_product")
+     */
+    public function index(): Response
+    {
+        return $this->render('product/index.html.twig', [
+            'controller_name' => 'ProductController',
+        ]);
+    }
+
     /**
      * @Route("/api/products", name="get_product", methods={"GET"})
      */

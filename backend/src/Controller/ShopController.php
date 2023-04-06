@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Shop;
 use App\Repository\ShopRepository;
 use DateTime;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class ShopController extends AbstractController
 {
     /**
-     * @Route("/shop", name="app_shop")
+     * @Route("/api/shop", name="app_shop")
      */
     public function index(): Response
     {
