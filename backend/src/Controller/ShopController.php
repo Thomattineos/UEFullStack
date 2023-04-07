@@ -25,16 +25,31 @@ class ShopController extends AbstractController
     }
 
     /**
-     * @Route("/api/shops", name="get_shops", methods={"GET"})
+
+    @Route("/api/shops", name="get_shops", methods={"GET"})
      */
     public function getShops(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $page = $request->query->getInt('page', 1);
         $pageSize = 8;
-        $totalShops = $entityManager->getRepository(Shop::class)->count([]);
+        $sort = $request->query->get('sortBy');
+        $sortOrder = $request->query->get('orderBy', 'asc');
+
+        $criteria = [];
+        $orderBy = [];
+
+        if ($sort === 'name') {
+            $orderBy['name'] = $sortOrder === 'asc' ? 'ASC' : 'DESC';
+        } elseif ($sort === 'creationDate') {
+            $orderBy['creationDate'] = $sortOrder === 'asc' ? 'ASC' : 'DESC';
+        }
+
+        $totalShops = $entityManager->getRepository(Shop::class)->count($criteria);
         $totalPages = ceil($totalShops / $pageSize);
         $offset = ($page - 1) * $pageSize;
-        $shops = $entityManager->getRepository(Shop::class)->findBy([], [], $pageSize, $offset);
+
+        $shops = $entityManager->getRepository(Shop::class)->findBy($criteria, $orderBy, $pageSize, $offset);
+
         $data = [];
 
         foreach ($shops as $shop) {
@@ -190,24 +205,5 @@ class ShopController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['message' => 'Boutique supprimée avec succès']);
-    }
-
-    /**
-     * @Route("/api/shops/sortBy/{value}", name="sort_shop", methods={"GET"})
-     */
-    public function sortShops($sortField)
-    {
-        $repository = $this->getDoctrine()->getRepository(Shop::class);
-
-        if ($sortField == "name") {
-            $shops = $repository->findBy([], ['name' => 'ASC']);
-        } elseif ($sortField == "creationDate") {
-            $shops = $repository->findBy([], ['creationDate' => 'DESC']);
-        } else {
-            // tri par défaut
-            $shops = $repository->findAll();
-        }
-
-        return $shops;
     }
 }

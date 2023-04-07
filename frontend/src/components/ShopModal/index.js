@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Table, Dropdown } from 'react-bootstrap';
+import { Table, Dropdown, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
@@ -8,7 +8,9 @@ function ShopModal() {
   const [shops, setShops] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [sortBy, setSortBy] = useState('default');
+  const [sort, setSort] = useState('');
+  const [sortOrder, setSortOrder] = useState("asc");
+
 
   const navigate = useNavigate();
 
@@ -28,20 +30,38 @@ function ShopModal() {
     }
   };
 
-  const handleSortChange = (event) => {
-    console.log("je suis entré");
-    setSortBy(event.target.value);
-    axios.get('/api/shops/sortBy/' + event.target.value)
+  const handleSortOrderChange = () => {
+    setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
+  }
+
+  const handleSortChange = ($key) => {
+    console.log(`/api/shops?sort=${$key}`);
+    setSort($key);
+    axios
+      .get(`http://localhost:8080/api/shops?sortBy=${$key}`)
       .then((response) => {
-        setShops(response.data);
-      })
-      .catch((error) => {
+        fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8&sortBy=${$key}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.shops.length === 0) {
+            setCurrentPage(prev => prev - 1);
+            setTotalPages(prev => prev - 1);
+          }
+          const processedData = data.shops.map(shop => ({
+            ...shop,
+            openingHours: new Date(shop.openingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            closingHours: new Date(shop.closingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            creationDate: new Date(shop.creationDate.date).toLocaleTimeString([], { year: 'numeric', month: '2-digit', day: '2-digit' }).substring(0, 10)
+          }));
+          setShops(processedData);
+          setTotalPages(data.pagination.totalPages)});
+        }).catch((error) => {
         console.log(error);
       });
   };
 
   useEffect(() => {
-    fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8`)
+    fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8${sort ? `&sortBy=${sort}` : ''}`)
       .then(response => response.json())
       .then(data => {
         const processedData = data.shops.map(shop => ({
@@ -53,7 +73,7 @@ function ShopModal() {
         setShops(processedData);
         setTotalPages(data.pagination.totalPages);
       });
-  }, [currentPage]);
+  }, [currentPage, sort]);
 
   const updateShop = (id) => {
     navigate(`/${id}/updateShop`);
@@ -64,45 +84,51 @@ function ShopModal() {
       method: 'DELETE',
     }).then(() => {
       fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8`)
-            .then(response => response.json())
-            .then(data => {
-                if(data.shops.length === 0) {
-                    setCurrentPage(prev => prev - 1 );
-                    setTotalPages(prev => prev - 1);
-                }
-                const processedData = data.shops.map(shop => ({
-                  ...shop,
-                  openingHours: new Date(shop.openingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                  closingHours: new Date(shop.closingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                  creationDate: new Date(shop.creationDate.date).toLocaleTimeString([], { year: 'numeric', month: '2-digit', day: '2-digit' }).substring(0, 10)
-                }));
-                setShops(processedData);
-                setTotalPages(data.pagination.totalPages);
-            });
+        .then(response => response.json())
+        .then(data => {
+          if (data.shops.length === 0) {
+            setCurrentPage(prev => prev - 1);
+            setTotalPages(prev => prev - 1);
+          }
+          const processedData = data.shops.map(shop => ({
+            ...shop,
+            openingHours: new Date(shop.openingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            closingHours: new Date(shop.closingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            creationDate: new Date(shop.creationDate.date).toLocaleTimeString([], { year: 'numeric', month: '2-digit', day: '2-digit' }).substring(0, 10)
+          }));
+          setShops(processedData);
+          setTotalPages(data.pagination.totalPages);
+        });
     }).catch(error => console.error(error));
   }
 
   return (
     <>
-      <h1 style={{textAlign: "center", marginTop: "4%"}}>Liste des boutiques</h1>
-      <div style={{ marginLeft: "5%" }}>
-      <Dropdown>
-        <Dropdown.Toggle variant="primary" id="dropdown-sort">
-          Trier
-        </Dropdown.Toggle>
+      <h1 style={{ textAlign: "center", marginTop: "4%" }}>Liste des boutiques</h1>
+      <div style={{ display: "flex", marginLeft: "5%" }}>
+        <Dropdown>
+          <Dropdown.Toggle variant="primary" id="dropdown-sort">{
+            sort === "name" ? "Nom" :
+            sort === "creationDate" ? "Date de création" :
+            sort === "numProducts" ? "Nombre de produits" : "Trier"
+          }
+          </Dropdown.Toggle>
 
-        <Dropdown.Menu>
-          <Dropdown.Item eventKey="name" onSelect={handleSortChange}>
-            Nom
-          </Dropdown.Item>
-          <Dropdown.Item eventKey="creationDate" onSelect={handleSortChange}>
-            Date de création
-          </Dropdown.Item>
-          <Dropdown.Item eventKey="product_count" onSelect={handleSortChange}>
-            Nombre de produits
-          </Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown>
+          <Dropdown.Menu>
+            <Dropdown.Item eventKey="name" onClick={() => handleSortChange("name")}>
+              Nom
+            </Dropdown.Item>
+            <Dropdown.Item eventKey="creationDate" onClick={() => handleSortChange("creationDate")}>
+              Date de création
+            </Dropdown.Item>
+            <Dropdown.Item eventKey="product_count" onClick={() => handleSortChange("numProducts")}>
+              Nombre de produits
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+        <Button variant="primary" onClick={handleSortOrderChange}>
+          {sortOrder === "asc" ? "↑" : "↓"}
+        </Button>
       </div>
       <div style={{ paddingTop: '4%', paddingRight: '5%', paddingLeft: '5%' }}>
         <Table striped bordered hover style={{ textAlign: 'center' }}>
