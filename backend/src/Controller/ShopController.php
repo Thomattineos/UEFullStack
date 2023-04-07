@@ -33,7 +33,7 @@ class ShopController extends AbstractController
         $page = $request->query->getInt('page', 1);
         $pageSize = 8;
         $sort = $request->query->get('sortBy');
-        $sortOrder = $request->query->get('orderBy', 'asc');
+        $sortOrder = $request->query->get('sortOrder', 'asc');
 
         $criteria = [];
         $orderBy = [];

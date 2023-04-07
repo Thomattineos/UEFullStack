@@ -8,9 +8,7 @@ function ShopModal() {
   const [shops, setShops] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [sort, setSort] = useState('');
-  const [sortOrder, setSortOrder] = useState("asc");
-
+  const [sort, setSort] = useState('name');
 
   const navigate = useNavigate();
 
@@ -29,10 +27,6 @@ function ShopModal() {
       setCurrentPage(currentPage + 1);
     }
   };
-
-  const handleSortOrderChange = () => {
-    setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
-  }
 
   const handleSortChange = ($key) => {
     console.log(`/api/shops?sort=${$key}`);
@@ -107,10 +101,10 @@ function ShopModal() {
       <h1 style={{ textAlign: "center", marginTop: "4%" }}>Liste des boutiques</h1>
       <div style={{ display: "flex", marginLeft: "5%" }}>
         <Dropdown>
-          <Dropdown.Toggle variant="primary" id="dropdown-sort">{
+          <Dropdown.Toggle variant="primary" id="dropdown-sort">Trier par : {
             sort === "name" ? "Nom" :
             sort === "creationDate" ? "Date de création" :
-            sort === "numProducts" ? "Nombre de produits" : "Trier"
+            sort === "numProducts" ? "Nombre de produits" : "Aucun"
           }
           </Dropdown.Toggle>
 
@@ -126,9 +120,6 @@ function ShopModal() {
             </Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
-        <Button variant="primary" onClick={handleSortOrderChange}>
-          {sortOrder === "asc" ? "↑" : "↓"}
-        </Button>
       </div>
       <div style={{ paddingTop: '4%', paddingRight: '5%', paddingLeft: '5%' }}>
         <Table striped bordered hover style={{ textAlign: 'center' }}>
