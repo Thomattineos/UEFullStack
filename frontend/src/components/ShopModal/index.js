@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Table } from 'react-bootstrap';
+import { Table, Dropdown } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
 
 function ShopModal() {
   const [shops, setShops] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [sortBy, setSortBy] = useState('default');
 
   const navigate = useNavigate();
 
@@ -26,6 +28,18 @@ function ShopModal() {
     }
   };
 
+  const handleSortChange = (event) => {
+    console.log("je suis entré");
+    setSortBy(event.target.value);
+    axios.get('/api/shops/sortBy/' + event.target.value)
+      .then((response) => {
+        setShops(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   useEffect(() => {
     fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8`)
       .then(response => response.json())
@@ -34,6 +48,7 @@ function ShopModal() {
           ...shop,
           openingHours: new Date(shop.openingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           closingHours: new Date(shop.closingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          creationDate: new Date(shop.creationDate.date).toLocaleTimeString([], { year: 'numeric', month: '2-digit', day: '2-digit' }).substring(0, 10),
         }));
         setShops(processedData);
         setTotalPages(data.pagination.totalPages);
@@ -41,7 +56,6 @@ function ShopModal() {
   }, [currentPage]);
 
   const updateShop = (id) => {
-    console.log("id=" + id);
     navigate(`/${id}/updateShop`);
   }
 
@@ -52,7 +66,6 @@ function ShopModal() {
       fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8`)
             .then(response => response.json())
             .then(data => {
-                console.log(data)
                 if(data.shops.length === 0) {
                     setCurrentPage(prev => prev - 1 );
                     setTotalPages(prev => prev - 1);
@@ -61,6 +74,7 @@ function ShopModal() {
                   ...shop,
                   openingHours: new Date(shop.openingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                   closingHours: new Date(shop.closingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  creationDate: new Date(shop.creationDate.date).toLocaleTimeString([], { year: 'numeric', month: '2-digit', day: '2-digit' }).substring(0, 10)
                 }));
                 setShops(processedData);
                 setTotalPages(data.pagination.totalPages);
@@ -71,6 +85,25 @@ function ShopModal() {
   return (
     <>
       <h1 style={{textAlign: "center", marginTop: "4%"}}>Liste des boutiques</h1>
+      <div style={{ marginLeft: "5%" }}>
+      <Dropdown>
+        <Dropdown.Toggle variant="primary" id="dropdown-sort">
+          Trier
+        </Dropdown.Toggle>
+
+        <Dropdown.Menu>
+          <Dropdown.Item eventKey="name" onSelect={handleSortChange}>
+            Nom
+          </Dropdown.Item>
+          <Dropdown.Item eventKey="creationDate" onSelect={handleSortChange}>
+            Date de création
+          </Dropdown.Item>
+          <Dropdown.Item eventKey="product_count" onSelect={handleSortChange}>
+            Nombre de produits
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+      </div>
       <div style={{ paddingTop: '4%', paddingRight: '5%', paddingLeft: '5%' }}>
         <Table striped bordered hover style={{ textAlign: 'center' }}>
           <thead>
@@ -79,16 +112,18 @@ function ShopModal() {
               <th>Horaires d'ouverture</th>
               <th>Horaires de fermeture</th>
               <th>Congé</th>
+              <th>Date de création</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {shops.map((shop) => (
               <tr key={shop.id}>
-                <td width={'15%'}>{shop.name}</td>
+                <td>{shop.name}</td>
                 <td>{shop.openingHours.toString()}</td>
                 <td>{shop.closingHours.toString()}</td>
                 <td>{shop.available ? 'Oui' : 'Non'}</td>
+                <td>{shop.creationDate.toString()}</td>
                 <td>
                   <button className="btn btn-primary" style={{ marginRight: '5%' }} onClick={() => updateShop(shop.id)}>Modifier</button>
                   <button className="btn btn-danger" onClick={() => deleteShop(shop.id)}>Supprimer</button>

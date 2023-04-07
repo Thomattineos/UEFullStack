@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ShopRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=ShopRepository::class)
@@ -24,6 +25,10 @@ class Shop
 
     /**
      * @ORM\Column(type="time")
+     * @Assert\Regex(
+     *     pattern="/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/",
+     *     message="Le format de l'heure d'ouverture doit être HH:mm"
+     * )
      */
     private $openingHours;
 
@@ -36,6 +41,13 @@ class Shop
      * @ORM\Column(type="boolean")
      */
     private $available;
+
+
+    /**
+     * @ORM\Column(type="date")
+     */
+    private $creationDate;
+
 
     public function getId(): ?int
     {
@@ -94,4 +106,19 @@ class Shop
         $this->available = $available;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getCreationDate()
+    {
+        return $this->creationDate;
+    }
+
+    /**
+     * @param mixed $creationDate
+     */
+    public function setCreationDate($creationDate): void
+    {
+        $this->creationDate = $creationDate;
+    }
 }

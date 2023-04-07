@@ -81,16 +81,29 @@ class ProductController extends AbstractController
     /**
      * @Route("/api/products", name="create_product", methods={"POST"})
      */
-    public function createProduct(Request $request): JsonResponse
+    public function createProduct(Request $request): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
-
         $data = json_decode($request->getContent(), true);
-
         $product = new Product();
-        $product->setName($data['name']);
-        $product->setPrice($data['price']);
-        $product->setDescription($data['description']);
+
+        if(isset($data['name']) && ($data['name']) != "")
+            $product->setName($data['name']);
+        else
+            return new Response('le nom d\'un produit ne peut pas être vide', Response::HTTP_BAD_REQUEST);
+
+        if(isset($data['price']) && ($data['price']) != "") {
+            if(!preg_match('/^[+-]?([0-9]*[.])?[0-9]+$/', $data['price']))
+                return new Response('le prix doit être un nombre entier ou décimal', Response::HTTP_BAD_REQUEST);
+            $product->setPrice($data['price']);
+        }
+        else
+            return new Response('le prix d\'un produit ne peut pas être vide', Response::HTTP_BAD_REQUEST);
+
+        if(isset($data['description']) && ($data['description']) != "")
+            $product->setDescription($data['description']);
+        else
+            return new Response('la description ne peut pas être vide', Response::HTTP_BAD_REQUEST);
 
         $entityManager->persist($product);
         $entityManager->flush();
@@ -102,7 +115,7 @@ class ProductController extends AbstractController
     /**
      * @Route("/api/products/{id}", name="update_product", methods={"PUT"})
      */
-    public function updateProduct(Request $request, $id): JsonResponse
+    public function updateProduct(Request $request, $id): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
         $product = $entityManager->getRepository(Product::class)->find($id);
@@ -113,9 +126,23 @@ class ProductController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
-        $product->setName($data['name']);
-        $product->setPrice($data['price']);
-        $product->setDescription($data['description']);
+        if(isset($data['name']) && ($data['name']) != "")
+            $product->setName($data['name']);
+        else
+            return new Response('le nom d\'un produit ne peut pas être vide', Response::HTTP_BAD_REQUEST);
+
+        if(isset($data['price']) && ($data['price']) != "") {
+            if(!preg_match('/^[+-]?([0-9]*[.])?[0-9]+$/', $data['price']))
+                return new Response('le prix doit être un nombre entier ou décimal', Response::HTTP_BAD_REQUEST);
+            $product->setPrice($data['price']);
+        }
+        else
+            return new Response('le prix d\'un produit ne peut pas être vide', Response::HTTP_BAD_REQUEST);
+
+        if(isset($data['description']) && ($data['description']) != "")
+            $product->setDescription($data['description']);
+        else
+            return new Response('la description ne peut pas être vide', Response::HTTP_BAD_REQUEST);
 
         $entityManager->flush();
 

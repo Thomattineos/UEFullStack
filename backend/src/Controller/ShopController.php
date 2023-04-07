@@ -43,7 +43,8 @@ class ShopController extends AbstractController
                 'name' => $shop->getName(),
                 'openingHours' => $shop->getOpeningHours(),
                 'closingHours' => $shop->getClosingHours(),
-                'available' => $shop->isAvailable()
+                'available' => $shop->isAvailable(),
+                'creationDate' => $shop->getCreationDate()
             ];
         }
 
@@ -80,6 +81,7 @@ class ShopController extends AbstractController
             'openingHours' => $shop->getOpeningHours(),
             'closingHours' => $shop->getClosingHours(),
             'available' => $shop->isAvailable(),
+            'creationDate' => $shop->getCreationDate()
         ];
 
         return new JsonResponse($data, Response::HTTP_OK);
@@ -89,21 +91,37 @@ class ShopController extends AbstractController
     /**
      * @Route("/api/shops", name="create_shop", methods={"POST"})
      */
-    public function createShop(Request $request): JsonResponse
+    public function createShop(Request $request): Response
     {
         $data = json_decode($request->getContent(), true);
-
         $shop = new Shop();
-        $shop->setName($data['name']);
 
-        $openingHours = new DateTime($data['openingHours']);
-        $closingHours = new DateTime($data['closingHours']);
+        if(isset($data['name']) && ($data['name']) != "")
+            $shop->setName($data['name']);
+        else
+            return new Response('le nom de boutique ne peut pas être vide', Response::HTTP_BAD_REQUEST);
 
-        //echo $openingHours;
+        if(isset($data['openingHours']) && ($data['openingHours']) != "") {
+            if(!preg_match('/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/', $data['openingHours']))
+                return new Response('Le format de openingHours doit être "hh:mm"', Response::HTTP_BAD_REQUEST);
+            $openingHours = new DateTime($data['openingHours']);
+            $shop->setOpeningHours($openingHours);
+        }
+        else return new Response('les horaires d\'ouverture ne peuvent pas être vides', Response::HTTP_BAD_REQUEST);
 
-        $shop->setOpeningHours($openingHours);
-        $shop->setClosingHours($closingHours);
+        if(isset($data['closingHours']) && ($data['closingHours']) != "") {
+            if(!preg_match('/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/', $data['closingHours']))
+                return new Response('Le format de closingHours doit être "hh:mm"', Response::HTTP_BAD_REQUEST);
+            $closingHours = new DateTime($data['closingHours']);
+            $shop->setClosingHours($closingHours);
+        }
+        else return new Response('les horaires de fermeture ne peuvent pas être vides', Response::HTTP_BAD_REQUEST);
+
         $shop->setAvailable($data['available']);
+
+        $now = new DateTime();
+
+        $shop->setCreationDate($now);
 
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($shop);
@@ -117,7 +135,7 @@ class ShopController extends AbstractController
      * @Route("/api/shops/{id}", name="update_shop", methods={"PUT"})
      * @throws \Exception
      */
-    public function updateShop(Request $request, EntityManagerInterface $entityManager, int $id): JsonResponse
+    public function updateShop(Request $request, EntityManagerInterface $entityManager, int $id): Response
     {
         $shop = $entityManager->getRepository(Shop::class)->find($id);
 
@@ -127,23 +145,29 @@ class ShopController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
-        if (isset($data['name'])) {
+        if(isset($data['name']) && ($data['name']) != "")
             $shop->setName($data['name']);
-        }
+        else
+            return new Response('le nom de boutique ne peut pas être vide', Response::HTTP_BAD_REQUEST);
 
-        if (isset($data['openingHours'])) {
-            $openingHours = new \DateTime($data['openingHours']);
+        if(isset($data['openingHours']) && ($data['openingHours']) != "") {
+            if(!preg_match('/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/', $data['openingHours']))
+                return new Response('Le format de openingHours doit être "hh:mm"', Response::HTTP_BAD_REQUEST);
+            $openingHours = new DateTime($data['openingHours']);
             $shop->setOpeningHours($openingHours);
         }
+        else return new Response('les horaires d\'ouverture ne peuvent pas être vides', Response::HTTP_BAD_REQUEST);
 
-        if (isset($data['closingHours'])) {
-            $closingHours = new \DateTime($data['closingHours']);
+        if(isset($data['closingHours']) && ($data['closingHours']) != "") {
+            if(!preg_match('/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/', $data['closingHours']))
+                return new Response('Le format de closingHours doit être "hh:mm"', Response::HTTP_BAD_REQUEST);
+            $closingHours = new DateTime($data['closingHours']);
             $shop->setClosingHours($closingHours);
         }
+        else return new Response('les horaires de fermeture ne peuvent pas être vides', Response::HTTP_BAD_REQUEST);
 
-        if (isset($data['available'])) {
-            $shop->setAvailable($data['available']);
-        }
+        $shop->setAvailable($data['available']);
+
 
         $entityManager->flush();
 
@@ -166,5 +190,24 @@ class ShopController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['message' => 'Boutique supprimée avec succès']);
+    }
+
+    /**
+     * @Route("/api/shops/sortBy/{value}", name="sort_shop", methods={"GET"})
+     */
+    public function sortShops($sortField)
+    {
+        $repository = $this->getDoctrine()->getRepository(Shop::class);
+
+        if ($sortField == "name") {
+            $shops = $repository->findBy([], ['name' => 'ASC']);
+        } elseif ($sortField == "creationDate") {
+            $shops = $repository->findBy([], ['creationDate' => 'DESC']);
+        } else {
+            // tri par défaut
+            $shops = $repository->findAll();
+        }
+
+        return $shops;
     }
 }
