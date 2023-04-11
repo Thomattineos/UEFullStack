@@ -29,32 +29,60 @@ class CategoryController extends AbstractController
     /**
      * @Route("/api/categories", name="get_categories", methods={"GET"})
      */
-    public function getCategories(Request $request, EntityManagerInterface $entityManager): Response
+    public function getCategories(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $page = $request->query->getInt('page', 1);
         $pageSize = 8;
-        $totalCategories = $entityManager->getRepository(Category::class)->count([]);
+        $sort = $request->query->get('sortBy');
+        $sortOrder = $request->query->get('sortOrder', 'asc');
+        $search = $request->query->get('search');
+
+        $criteria = [];
+        $orderBy = [];
+
+        if ($sort === 'name') {
+            $orderBy['name'] = $sortOrder === 'asc' ? 'ASC' : 'DESC';
+        } elseif ($sort === 'numProducts') {
+            $orderBy['numProducts'] = $sortOrder === 'asc' ? 'ASC' : 'DESC';
+        }
+
+        $totalCategories = $entityManager->getRepository(Category::class)->count($criteria);
         $totalPages = ceil($totalCategories / $pageSize);
         $offset = ($page - 1) * $pageSize;
-        $categories = $entityManager->getRepository(Category::class)->findBy([], [], $pageSize, $offset);
+
+        if ($search) {
+            $queryBuilder = $entityManager->createQueryBuilder();
+            $queryBuilder->select('c')
+                ->from(Category::class, 'c')
+                ->andWhere($queryBuilder->expr()->like('c.name', ':search'))
+                ->setParameter('search', '%' . $search . '%');
+            $categories = $queryBuilder
+                ->addOrderBy('c.name', 'ASC')
+                ->setFirstResult(($page - 1) * $pageSize)
+                ->setMaxResults($pageSize)
+                ->getQuery()
+                ->getResult();
+        } else {
+            $categories = $entityManager->getRepository(Category::class)->findBy($criteria, $orderBy, $pageSize, $offset);
+        }
+
         $data = [];
 
         foreach ($categories as $category) {
             $data[] = [
                 'id' => $category->getId(),
-                'name' => $category->getName(),
+                'name' => $category->getName()
             ];
         }
 
         $paginationData = [
             'currentPage' => $page,
             'totalPages' => $totalPages,
-            'totalProducts' => $totalCategories,
+            'totalCategories' => $totalCategories,
             'pageSize' => $pageSize,
             'nextPage' => $page < $totalPages ? $page + 1 : null,
             'prevPage' => $page > 1 ? $page - 1 : null,
         ];
-
 
         return new JsonResponse([
             'categories' => $data,

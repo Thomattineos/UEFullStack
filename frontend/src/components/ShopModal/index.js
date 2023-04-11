@@ -75,38 +75,38 @@ function ShopModal() {
     <>
       <h1 style={{ textAlign: "center", margin: "2%" }}>Liste des boutiques</h1>
       <div style={{ paddingRight: '5%', paddingLeft: '5%' }}>
-      <div style={{ display: "flex" }}>
-        <div>
-          <Dropdown>
-            <Dropdown.Toggle variant="primary" id="dropdown-sort">Trier par : {
-              sort === "name" ? "Nom" :
-                sort === "creationDate" ? "Date de création" :
-                  sort === "numProducts" ? "Nombre de produits" : "Aucun"
-            }
-            </Dropdown.Toggle>
+        <div style={{ display: "flex" }}>
+          <div>
+            <Dropdown>
+              <Dropdown.Toggle variant="primary" id="dropdown-sort">Trier par : {
+                sort === "name" ? "Nom" :
+                  sort === "creationDate" ? "Date de création" :
+                    sort === "numProducts" ? "Nombre de produits" : "Aucun"
+              }
+              </Dropdown.Toggle>
 
-            <Dropdown.Menu>
-              <Dropdown.Item eventKey="name" onClick={() => setSort("name")}>
-                Nom
-              </Dropdown.Item>
-              <Dropdown.Item eventKey="creationDate" onClick={() => setSort("creationDate")}>
-                Date de création
-              </Dropdown.Item>
-              <Dropdown.Item eventKey="product_count" onClick={() => setSort("numProducts")}>
-                Nombre de produits
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
-        <div style={{ marginLeft: "1%", width:"100%" }}>
-          <Form>
-            <Form.Control
-              type="text"
-              placeholder="Rechercher une boutique..."
-              value={searchShop}
-              onChange={({currentTarget: input}) => setSearchShop(input.value)}
-            />
-          </Form>
+              <Dropdown.Menu>
+                <Dropdown.Item eventKey="name" onClick={() => setSort("name")}>
+                  Nom
+                </Dropdown.Item>
+                <Dropdown.Item eventKey="creationDate" onClick={() => setSort("creationDate")}>
+                  Date de création
+                </Dropdown.Item>
+                <Dropdown.Item eventKey="product_count" onClick={() => setSort("numProducts")}>
+                  Nombre de produits
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
+          <div style={{ marginLeft: "1%", width: "100%" }}>
+            <Form>
+              <Form.Control
+                type="text"
+                placeholder="Rechercher une boutique..."
+                value={searchShop}
+                onChange={({ currentTarget: input }) => setSearchShop(input.value)}
+              />
+            </Form>
           </div>
         </div>
         <Table striped bordered hover style={{ textAlign: 'center', marginTop: "1%" }}>

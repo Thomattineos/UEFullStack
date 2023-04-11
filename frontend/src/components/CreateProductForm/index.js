@@ -18,6 +18,7 @@ const CreateProductForm = () => {
             .post("http://localhost:8080/api/products", {
                 name,
                 price,
+                description
             })
             .then((response) => {
                 if (response.status === 201) {

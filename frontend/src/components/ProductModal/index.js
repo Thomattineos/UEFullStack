@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Table } from 'react-bootstrap';
+import { Table, Dropdown, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Prev } from 'react-bootstrap/esm/PageItem';
 
 function ProductModal() {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [sort, setSort] = useState('name');
+    const [searchProduct, setSearchProduct] = useState("");
 
     const navigate = useNavigate();
 
@@ -28,13 +29,13 @@ function ProductModal() {
     };
 
     useEffect(() => {
-        fetch(`http://localhost:8080/api/products?page=${currentPage}&limit=8`)
+        fetch(`http://localhost:8080/api/products?page=${currentPage}&limit=8${sort ? `&sortBy=${sort}` : ''}&search=${searchProduct}`)
             .then(response => response.json())
             .then(data => {
                 setProducts(data.products);
                 setTotalPages(data.pagination.totalPages);
             });
-    }, [currentPage]);
+    }, [currentPage, sort, searchProduct]);
 
     const updateProduct = (id) => {
         console.log("id=" + id);
@@ -46,24 +47,54 @@ function ProductModal() {
             method: 'DELETE',
         }).then(() => {
             fetch(`http://localhost:8080/api/products?page=${currentPage}&limit=8`)
-            .then(response => response.json())
-            .then(data => {
-                console.log(data)
-                if(data.products.length === 0) {
-                    setCurrentPage(prev => prev - 1 );
-                    setTotalPages(prev => prev - 1);
-                }
-                setProducts(data.products);
-                setTotalPages(data.pagination.totalPages);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    if (data.products.length === 0) {
+                        setCurrentPage(prev => prev - 1);
+                        setTotalPages(prev => prev - 1);
+                    }
+                    setProducts(data.products);
+                    setTotalPages(data.pagination.totalPages);
+                });
         }).catch(error => console.error(error));
     }
 
     return (
         <>
-            <h1 style={{textAlign: "center", marginTop: "4%"}}>Liste des produits</h1>
-            <div style={{ paddingTop: '4%', paddingRight: '5%', paddingLeft: '5%' }}>
-                <Table striped bordered hover style={{ textAlign: 'center' }}>
+            <h1 style={{ textAlign: "center", margin: "2%" }}>Liste des produits</h1>
+            <div style={{ paddingRight: '5%', paddingLeft: '5%' }}>
+                <div style={{ display: "flex" }}>
+                    <div>
+                        <Dropdown>
+                            <Dropdown.Toggle variant="primary" id="dropdown-sort">Trier par : {
+                                sort === "name" ? "Nom" :
+                                    sort === "price" ? "Prix" : "Aucun"
+                            }
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu>
+                                <Dropdown.Item eventKey="name" onClick={() => setSort("name")}>
+                                    Nom
+                                </Dropdown.Item>
+                                <Dropdown.Item eventKey="creationDate" onClick={() => setSort("price")}>
+                                    Prix
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </div>
+                    <div style={{ marginLeft: "1%", width: "100%" }}>
+                        <Form>
+                            <Form.Control
+                                type="text"
+                                placeholder="Rechercher un produit..."
+                                value={searchProduct}
+                                onChange={({ currentTarget: input }) => setSearchProduct(input.value)}
+                            />
+                        </Form>
+                    </div>
+                </div>
+                <Table striped bordered hover style={{ textAlign: 'center', marginTop: "1%" }}>
                     <thead>
                         <tr>
                             <th>Nom</th>

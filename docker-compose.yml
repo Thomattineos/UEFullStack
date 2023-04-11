@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  # Configuration de la base de données
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: database_name
+      MYSQL_USER: database_user
+      MYSQL_PASSWORD: database_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  # Configuration du back-end
+  backend:
+    build: ./backend
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: database_name
+      DB_USERNAME: database_user
+      DB_PASSWORD: database_password
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "8080:8080"
+
+  # Configuration du front-end
+  frontend:
+    build: ./frontend
+    restart: always
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+
+volumes:
+  db_data:

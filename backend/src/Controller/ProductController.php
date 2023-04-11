@@ -25,16 +25,46 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/api/products", name="get_product", methods={"GET"})
+     * @Route("/api/products", name="get_products", methods={"GET"})
      */
     public function getProducts(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $page = $request->query->getInt('page', 1);
         $pageSize = 8;
-        $totalProducts = $entityManager->getRepository(Product::class)->count([]);
+        $sort = $request->query->get('sortBy');
+        $sortOrder = $request->query->get('sortOrder', 'asc');
+        $search = $request->query->get('search');
+
+        $criteria = [];
+        $orderBy = [];
+
+        if ($sort === 'name') {
+            $orderBy['name'] = $sortOrder === 'asc' ? 'ASC' : 'DESC';
+        } elseif ($sort === 'price') {
+            $orderBy['price'] = $sortOrder === 'asc' ? 'ASC' : 'DESC';
+        }
+
+        $totalProducts = $entityManager->getRepository(Product::class)->count($criteria);
         $totalPages = ceil($totalProducts / $pageSize);
         $offset = ($page - 1) * $pageSize;
-        $products = $entityManager->getRepository(Product::class)->findBy([], [], $pageSize, $offset);
+
+        if ($search) {
+            $queryBuilder = $entityManager->createQueryBuilder();
+            $queryBuilder->select('p')
+                ->from(Product::class, 'p')
+                ->andWhere($queryBuilder->expr()->like('p.name', ':search'))
+                ->setParameter('search', '%' . $search . '%');
+            $products = $queryBuilder
+                ->addOrderBy('p.name', 'ASC')
+                ->addOrderBy('p.price', 'DESC')
+                ->setFirstResult(($page - 1) * $pageSize)
+                ->setMaxResults($pageSize)
+                ->getQuery()
+                ->getResult();
+        } else {
+            $products = $entityManager->getRepository(Product::class)->findBy($criteria, $orderBy, $pageSize, $offset);
+        }
+
         $data = [];
 
         foreach ($products as $product) {
@@ -42,7 +72,7 @@ class ProductController extends AbstractController
                 'id' => $product->getId(),
                 'name' => $product->getName(),
                 'price' => $product->getPrice(),
-                'description' => $product->getDescription(),
+                'description' => $product->getDescription()
             ];
         }
 
@@ -54,7 +84,6 @@ class ProductController extends AbstractController
             'nextPage' => $page < $totalPages ? $page + 1 : null,
             'prevPage' => $page > 1 ? $page - 1 : null,
         ];
-
 
         return new JsonResponse([
             'products' => $data,
@@ -95,15 +124,13 @@ class ProductController extends AbstractController
         if(isset($data['price']) && ($data['price']) != "") {
             if(!preg_match('/^[+-]?([0-9]*[.])?[0-9]+$/', $data['price']))
                 return new Response('le prix doit être un nombre entier ou décimal', Response::HTTP_BAD_REQUEST);
+
             $product->setPrice($data['price']);
         }
         else
             return new Response('le prix d\'un produit ne peut pas être vide', Response::HTTP_BAD_REQUEST);
 
-        if(isset($data['description']) && ($data['description']) != "")
-            $product->setDescription($data['description']);
-        else
-            return new Response('la description ne peut pas être vide', Response::HTTP_BAD_REQUEST);
+        $product->setDescription($data['description']);
 
         $entityManager->persist($product);
         $entityManager->flush();
