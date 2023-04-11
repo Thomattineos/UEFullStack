@@ -25,8 +25,7 @@ class ShopController extends AbstractController
     }
 
     /**
-
-    @Route("/api/shops", name="get_shops", methods={"GET"})
+     * @Route("/api/shops", name="get_shops", methods={"GET"})
      */
     public function getShops(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -34,6 +33,7 @@ class ShopController extends AbstractController
         $pageSize = 8;
         $sort = $request->query->get('sortBy');
         $sortOrder = $request->query->get('sortOrder', 'asc');
+        $search = $request->query->get('search');
 
         $criteria = [];
         $orderBy = [];
@@ -48,7 +48,22 @@ class ShopController extends AbstractController
         $totalPages = ceil($totalShops / $pageSize);
         $offset = ($page - 1) * $pageSize;
 
-        $shops = $entityManager->getRepository(Shop::class)->findBy($criteria, $orderBy, $pageSize, $offset);
+        if ($search) {
+            $queryBuilder = $entityManager->createQueryBuilder();
+            $queryBuilder->select('s')
+                ->from(Shop::class, 's')
+                ->andWhere($queryBuilder->expr()->like('s.name', ':search'))
+                ->setParameter('search', '%' . $search . '%');
+            $shops = $queryBuilder
+                ->addOrderBy('s.name', 'ASC')
+                ->addOrderBy('s.creationDate', 'DESC')
+                ->setFirstResult(($page - 1) * $pageSize)
+                ->setMaxResults($pageSize)
+                ->getQuery()
+                ->getResult();
+        } else {
+            $shops = $entityManager->getRepository(Shop::class)->findBy($criteria, $orderBy, $pageSize, $offset);
+        }
 
         $data = [];
 

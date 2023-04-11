@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Table, Dropdown, Button } from 'react-bootstrap';
+import { Table, Dropdown, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios';
 
 function ShopModal() {
   const [shops, setShops] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sort, setSort] = useState('name');
+  const [searchShop, setSearchShop] = useState("");
+
 
   const navigate = useNavigate();
 
@@ -28,34 +29,8 @@ function ShopModal() {
     }
   };
 
-  const handleSortChange = ($key) => {
-    console.log(`/api/shops?sort=${$key}`);
-    setSort($key);
-    axios
-      .get(`http://localhost:8080/api/shops?sortBy=${$key}`)
-      .then((response) => {
-        fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8&sortBy=${$key}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.shops.length === 0) {
-            setCurrentPage(prev => prev - 1);
-            setTotalPages(prev => prev - 1);
-          }
-          const processedData = data.shops.map(shop => ({
-            ...shop,
-            openingHours: new Date(shop.openingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            closingHours: new Date(shop.closingHours.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            creationDate: new Date(shop.creationDate.date).toLocaleTimeString([], { year: 'numeric', month: '2-digit', day: '2-digit' }).substring(0, 10)
-          }));
-          setShops(processedData);
-          setTotalPages(data.pagination.totalPages)});
-        }).catch((error) => {
-        console.log(error);
-      });
-  };
-
   useEffect(() => {
-    fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8${sort ? `&sortBy=${sort}` : ''}`)
+    fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8${sort ? `&sortBy=${sort}` : ''}&search=${searchShop}`)
       .then(response => response.json())
       .then(data => {
         const processedData = data.shops.map(shop => ({
@@ -67,7 +42,7 @@ function ShopModal() {
         setShops(processedData);
         setTotalPages(data.pagination.totalPages);
       });
-  }, [currentPage, sort]);
+  }, [currentPage, sort, searchShop]);
 
   const updateShop = (id) => {
     navigate(`/${id}/updateShop`);
@@ -98,31 +73,41 @@ function ShopModal() {
 
   return (
     <>
-      <h1 style={{ textAlign: "center", marginTop: "4%" }}>Liste des boutiques</h1>
-      <div style={{ display: "flex", marginLeft: "5%" }}>
+      <h1 style={{ textAlign: "center", margin: "2%" }}>Liste des boutiques</h1>
+      <div style={{ paddingRight: '5%', paddingLeft: '5%' }}>
+      <div>
         <Dropdown>
           <Dropdown.Toggle variant="primary" id="dropdown-sort">Trier par : {
             sort === "name" ? "Nom" :
-            sort === "creationDate" ? "Date de création" :
-            sort === "numProducts" ? "Nombre de produits" : "Aucun"
+              sort === "creationDate" ? "Date de création" :
+                sort === "numProducts" ? "Nombre de produits" : "Aucun"
           }
           </Dropdown.Toggle>
 
           <Dropdown.Menu>
-            <Dropdown.Item eventKey="name" onClick={() => handleSortChange("name")}>
+            <Dropdown.Item eventKey="name" onClick={() => setSort("name")}>
               Nom
             </Dropdown.Item>
-            <Dropdown.Item eventKey="creationDate" onClick={() => handleSortChange("creationDate")}>
+            <Dropdown.Item eventKey="creationDate" onClick={() => setSort("creationDate")}>
               Date de création
             </Dropdown.Item>
-            <Dropdown.Item eventKey="product_count" onClick={() => handleSortChange("numProducts")}>
+            <Dropdown.Item eventKey="product_count" onClick={() => setSort("numProducts")}>
               Nombre de produits
             </Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
       </div>
-      <div style={{ paddingTop: '4%', paddingRight: '5%', paddingLeft: '5%' }}>
-        <Table striped bordered hover style={{ textAlign: 'center' }}>
+      <div style={{ marginTop: "1%" }}>
+          <Form>
+            <Form.Control
+              type="text"
+              placeholder="Rechercher une boutique..."
+              value={searchShop}
+              onChange={({currentTarget: input}) => setSearchShop(input.value)}
+            />
+          </Form>
+        </div>
+        <Table striped bordered hover style={{ textAlign: 'center', marginTop: "1%" }}>
           <thead>
             <tr>
               <th>Nom</th>
@@ -150,7 +135,7 @@ function ShopModal() {
           </tbody>
         </Table>
       </div>
-      <div className="d-flex justify-content-center">
+      <div className="d-flex justify-content-center" style={{ marginTop: "2%" }}>
         <button className="btn btn-primary mr-2" onClick={handlePrevPage}>Précédent</button>
         <button className="btn btn-primary mr-2" disabled>{currentPage} / {totalPages}</button>
         <button className="btn btn-primary" onClick={handleNextPage}>Suivant</button>
