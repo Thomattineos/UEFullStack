@@ -48,6 +48,11 @@ class Shop
      */
     private $creationDate;
 
+    /**
+     * @ORM\OneToMany(targetEntity=ShopProduct::class, mappedBy="shop")
+     */
+    private $products;
+
 
     public function getId(): ?int
     {
@@ -120,5 +125,17 @@ class Shop
     public function setCreationDate($creationDate): void
     {
         $this->creationDate = $creationDate;
+    }
+
+    public function getProducts(): ?ShopProduct
+    {
+        return $this->products;
+    }
+
+    public function setProducts(?ShopProduct $products): self
+    {
+        $this->products = $products;
+
+        return $this;
     }
 }

@@ -11,6 +11,7 @@ import UpdateProductForm from './components/UpdateProductForm';
 import CategoryModal from './components/CategoryModal';
 import CreateCategoryForm from './components/CreateCategoryForm';
 import UpdateCategoryForm from './components/UpdateCategoryForm';
+import ShopProductModal from './components/ShopProductModal';
 import 'bootstrap/dist/css/bootstrap.css';
 
 function App() {
@@ -30,6 +31,8 @@ function App() {
         <Route path="/categories" element={<CategoryModal />} />
         <Route path="/createCategory" element={<CreateCategoryForm />} />
         <Route path="/:id/updateCategory" element={<UpdateCategoryForm />} />
+
+        <Route path="/shop/:id/products" element={<ShopProductModal />} />
       </Routes>
     </>
   );

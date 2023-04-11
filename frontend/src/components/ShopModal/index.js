@@ -29,6 +29,10 @@ function ShopModal() {
     }
   };
 
+  const handleShowProducts = (id) => {
+    navigate(`/shop/${id}/products`);
+  };
+
   useEffect(() => {
     fetch(`http://localhost:8080/api/shops?page=${currentPage}&limit=8${sort ? `&sortBy=${sort}` : ''}&search=${searchShop}`)
       .then(response => response.json())
@@ -123,11 +127,11 @@ function ShopModal() {
           <tbody>
             {shops.map((shop) => (
               <tr key={shop.id}>
-                <td>{shop.name}</td>
-                <td>{shop.openingHours.toString()}</td>
-                <td>{shop.closingHours.toString()}</td>
-                <td>{shop.available ? 'Oui' : 'Non'}</td>
-                <td>{shop.creationDate.toString()}</td>
+                <td onClick={() => handleShowProducts(shop.id)}>{shop.name}</td>
+                <td onClick={() => handleShowProducts(shop.id)}>{shop.openingHours.toString()}</td>
+                <td onClick={() => handleShowProducts(shop.id)}>{shop.closingHours.toString()}</td>
+                <td onClick={() => handleShowProducts(shop.id)}>{shop.available ? 'Oui' : 'Non'}</td>
+                <td onClick={() => handleShowProducts(shop.id)}>{shop.creationDate.toString()}</td>
                 <td>
                   <button className="btn btn-primary" style={{ marginRight: '5%' }} onClick={() => updateShop(shop.id)}>Modifier</button>
                   <button className="btn btn-danger" onClick={() => deleteShop(shop.id)}>Supprimer</button>

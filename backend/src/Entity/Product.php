@@ -38,6 +38,11 @@ class Product
     private $description;
 
     /**
+     * @ORM\OneToMany(targetEntity=ShopProduct::class, mappedBy="product")
+     */
+    private $shops;
+
+    /**
      * @return mixed
      */
     public function getDescription()
@@ -73,6 +78,18 @@ class Product
     public function setPrice(float $price): self
     {
         $this->price = $price;
+
+        return $this;
+    }
+
+    public function getShops(): ?ShopProduct
+    {
+        return $this->shops;
+    }
+
+    public function setShops(?ShopProduct $shops): self
+    {
+        $this->shops = $shops;
 
         return $this;
     }
